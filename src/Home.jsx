@@ -24,7 +24,7 @@ function Home() {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'multipart/form-data' // FormData uchun zarur
+        'Content-Type': 'multipart/form-data' 
       },
       data: formData
     })
@@ -73,8 +73,9 @@ function Home() {
       dataIndex: 'actions',
       render: () => (
         <>
-          <Button type='primary'>Edit</Button>
-          <Button danger type='primary'>Delete</Button>
+          <Button type='primary'>Edit </Button>
+          
+          <Button danger type='primary'>Delete </Button>
         </>
       )
     }
