@@ -43,7 +43,7 @@ export default function Login() {
       </div>
       <div className='login-right' style={{ width: "100%" }}>
         <p style={{
-          color: "black", padding: "10px 90px", fontFamily: "sans-serif", fontSize: "12px", width: "70%",
+          color: "black", padding: "10px", fontFamily: "sans-serif", fontSize: "12px", width: "70%",
           textAlign: "center", margin: "0 auto", lineHeight: "1.3"
         }}>
           MUHAMMAD AL-XORAZMIY NOMIDAGI
