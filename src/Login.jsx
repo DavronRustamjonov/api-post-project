@@ -1,39 +1,43 @@
 import { Button, Form, Input, message } from 'antd';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
+  const [form] = Form.useForm();
   const navigate = useNavigate();
-  const handleLogin = () => {
-    axios({
-      url: 'https://autoapi.dezinfeksiyatashkent.uz/api/auth/signin',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: {
-        phone_number: phone,
-        password: password,
-      },
-    })
-      .then(res => {
-        if (res.data.success) {
-          localStorage.setItem('token', res?.data?.data?.tokens?.accessToken?.token);
-          message.success("Maqtov yorliq olib chiqilar !!!");
-          navigate("/home");
-        }
-      })
-      .catch(error => {
-        message.error("Login or password is wrong!!!!!!!!!!");
+
+  const handleLogin = async (values) => {
+    try {
+      const response = await axios({
+        url: 'https://autoapi.dezinfeksiyatashkent.uz/api/auth/signin',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          phone_number: values.phone,
+          password: values.password,
+        },
       });
+
+      if (response.data.success) {
+        localStorage.setItem('token', response?.data?.data?.tokens?.accessToken?.token);
+        message.success("Maqtov yorliq olib chiqilar !!!");
+        form.resetFields();
+        navigate("/home");
+      } else {
+        message.error("Login or password is wrong!!!!!!!!!!");
+      }
+    } catch (error) {
+      message.error("Login or password is wrong!!!!!!!!!!");
+    }
   };
 
   return (
     <div style={styles.container}>
       <Form 
+        form={form} 
         name="login"
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
@@ -47,7 +51,7 @@ export default function Login() {
           name="phone"
           rules={[{ required: true, message: 'Please input your phone number!' }]}
         >
-          <Input onChange={(e) => setPhone(e.target.value)} />
+          <Input />
         </Form.Item>
 
         <Form.Item
@@ -55,21 +59,20 @@ export default function Login() {
           name="password"
           rules={[{ required: true, message: 'Please input your password!' }]}
         >
-          <Input.Password onChange={(e) => setPassword(e.target.value)} />
+          <Input.Password />
         </Form.Item>
 
         <Form.Item
           wrapperCol={{ offset: 8, span: 16 }}
         >
-          <Button type="primary" htmlType="submit" style={styles.button}  >
-            Kirish
+          <Button type="primary" htmlType="submit" style={styles.button}>
+            Submit
           </Button>
         </Form.Item>
       </Form>
     </div>
   );
 }
-
 
 const styles = {
   container: {
@@ -91,6 +94,3 @@ const styles = {
     width: '100%',
   },
 };
-
-
-

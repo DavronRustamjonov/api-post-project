@@ -1,7 +1,6 @@
 import { Button, Form, Input, Modal, Table, message } from 'antd';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-
+import React, { useEffect, useState, useRef } from 'react';
 
 function Home() {
   // Modal holati
@@ -11,6 +10,9 @@ function Home() {
 
   // Rasm holati
   const [image, setImage] = useState(null);
+
+  // Form referensiyasi
+  const formRef = useRef(null);
 
   // Formani yuborish funksiyasi
   const handleSubmit = (values) => {
@@ -33,6 +35,7 @@ function Home() {
         message.success("Qo'shildi");
         setOpen(false);
         getCities();
+        formRef.current.resetFields(); // Formani tozalash
       }
     })
     .catch(error => {
@@ -41,7 +44,7 @@ function Home() {
     });
   };
 
-  // Shaharlarga oid ma'lumotlar
+  // api  oid ma'lumotlar
   const [cities, setCities] = useState([]);
   const getCities = () => {
     axios.get('https://autoapi.dezinfeksiyatashkent.uz/api/cities')
@@ -53,7 +56,7 @@ function Home() {
     getCities();
   }, []);
 
-  // Jadval uchun ustunlar
+  // Jadval uchun kerak bu joyi 
   const columns = [
     {
       title: 'Images',
@@ -74,7 +77,6 @@ function Home() {
       render: () => (
         <>
           <Button type='primary'>Edit </Button>
-          
           <Button danger type='primary'>Delete </Button>
         </>
       )
@@ -99,6 +101,7 @@ function Home() {
       <Table columns={columns} dataSource={data} />
       <Modal title="City qo'shish" open={open} footer={null} onCancel={closeModal}>
         <Form
+          ref={formRef}
           wrapperCol={{ span: 20 }}
           style={{ maxWidth: 600 }}
           onFinish={handleSubmit}
