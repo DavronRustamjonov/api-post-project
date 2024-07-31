@@ -1,6 +1,8 @@
 import { Button, Form, Input, message } from 'antd';
 import axios from 'axios';
 import React from 'react';
+import LMS from '/lmss.svg';
+import Logo from '/logolms.png';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
@@ -35,62 +37,79 @@ export default function Login() {
   };
 
   return (
-    <div style={styles.container}>
-      <Form 
-        form={form} 
-        name="login"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        style={styles.form}
-        initialValues={{ remember: true }}
-        autoComplete="off"
-        onFinish={handleLogin}
-      >
-        <Form.Item
-          label="Phone"
-          name="phone"
-          rules={[{ required: true, message: 'Please input your phone number!' }]}
+    <div style={{ display: "flex", textAlign: "center", height: "100%" }} className='container'>
+      <div style={{ width: "85%", alignItems: 'center', background: "rgb(29, 45, 91)", padding: "20px" }}>
+        <img src={LMS} alt="lms study" style={{ width: "100%" }} />
+      </div>
+      <div className='login-right' style={{ width: "100%" }}>
+        <p style={{
+          color: "black", padding: "10px 90px", fontFamily: "sans-serif", fontSize: "12px", width: "70%",
+          textAlign: "center", margin: "0 auto", lineHeight: "1.3"
+        }}>
+          MUHAMMAD AL-XORAZMIY NOMIDAGI
+          TOSHKENT AXBOROT TEXNOLOGIYALARI
+          UNIVERSITETI
+        </p>
+        <span style={{ width: "100px", marginBottom: '20px' }}>
+          <img src={Logo} alt="logo lms" />
+        </span>
+        <Form
+          form={form}
+          name="login"
+          labelAlign="top" 
+          style={styles.form}
+          initialValues={{ remember: true }}
+          autoComplete="off"
+          onFinish={handleLogin}
         >
-          <Input />
-        </Form.Item>
+          <Form.Item
+            label="Phone"
+            name="phone"
+            rules={[{ required: true, message: 'Please input your phone number!' }]}
+            style={styles.formItem} 
+          >
+            <Input />
+          </Form.Item>
 
-        <Form.Item
-          label="Password"
-          name="password"
-          rules={[{ required: true, message: 'Please input your password!' }]}
-        >
-          <Input.Password />
-        </Form.Item>
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: 'Please input your password!' }]}
+            style={styles.formItem} 
+          >
+            <Input.Password />
+          </Form.Item>
 
-        <Form.Item
-          wrapperCol={{ offset: 8, span: 16 }}
-        >
-          <Button type="primary" htmlType="submit" style={styles.button}>
-            Submit
-          </Button>
-        </Form.Item>
-      </Form>
+          <Form.Item
+            wrapperCol={{ offset: 0, span: 24 }} 
+            style={styles.formItem} 
+          >
+            <Button type="primary" htmlType="submit" style={styles.button}>
+              Kirish
+            </Button>
+          </Form.Item>
+        </Form>
+        <div>
+          <p style={{fontFamily:"sans-serif",fontSize:"10px"}}>Mualliflik huquqi © 2021 Toshkent axborot texnologiyalari universiteti</p>
+        </div>
+      </div>
+      
     </div>
   );
 }
 
 const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    backgroundColor: '#f0f2f5',
-  },
   form: {
-    maxWidth: '400px', 
+    maxWidth: '400px',
     width: '100%',
-    border: '2px solid azure',  
-    borderRadius:'10px',
-    boxShadow: '0px 4px 12px 0px rgb(232, 226, 226)',
-    padding: '20px'
+    padding: '20px',
+    margin: '0 auto',
   },
   button: {
     width: '100%',
+    marginTop: "30px",
   },
+  formItem: {
+    marginBottom: '16px',
+  }
 };
