@@ -1,12 +1,16 @@
 import { Button, Form, Input, Modal, Table, message } from 'antd';
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router';
 
 function Home() {
   // Modal holati
   const [open, setOpen] = useState(false);
   const showModal = () => setOpen(true);
   const closeModal = () => setOpen(false);
+  // shunchaki  /home qo`shsak unga o`tib ketmasligi uchun kerak bo`lgan narsa . Ya`ni /home ga o`tish uchun phone va password qatiy talab qiluvchi narsa  
+  const navigate=useNavigate()
+  const token =localStorage.getItem('token')
 
   // Rasm holati
   const [image, setImage] = useState(null);
@@ -53,6 +57,9 @@ function Home() {
   };
 
   useEffect(() => {
+    if(!token){
+      navigate('/')
+    }
     getCities();
   }, []);
 
