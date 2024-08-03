@@ -4,22 +4,25 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 function Home() {
+  // Yuklanish holati
+  const [loading, setLoading] = useState(false);
   // Modal holati
   const [open, setOpen] = useState(false);
   const showModal = () => setOpen(true);
   const closeModal = () => setOpen(false);
-  // shunchaki  /home qo`shsak unga o`tib ketmasligi uchun kerak bo`lgan narsa . Ya`ni /home ga o`tish uchun phone va password qatiy talab qiluvchi narsa  
-  const navigate=useNavigate()
-  const token =localStorage.getItem('token')
+  // Navigatsiya va token
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
 
   // Rasm holati
   const [image, setImage] = useState(null);
 
-  // Form referensiyasi
+  // Forma referensiyasi
   const formRef = useRef(null);
 
   // Formani yuborish funksiyasi
   const handleSubmit = (values) => {
+    setLoading(true);
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('text', values.text);
@@ -30,7 +33,7 @@ function Home() {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'multipart/form-data' 
+        'Content-Type': 'multipart/form-data'
       },
       data: formData
     })
@@ -45,10 +48,13 @@ function Home() {
     .catch(error => {
       console.error(error);
       message.error("Xatolik yuz berdi: " + (error.response?.data?.message || "Server bilan bog'lanishda xatolik"));
+    })
+    .finally(() => {
+      setLoading(false);
     });
   };
 
-  // api  oid ma'lumotlar
+  // API dan shaharlar ro'yxatini olish
   const [cities, setCities] = useState([]);
   const getCities = () => {
     axios.get('https://autoapi.dezinfeksiyatashkent.uz/api/cities')
@@ -57,13 +63,13 @@ function Home() {
   };
 
   useEffect(() => {
-    if(!token){
-      navigate('/')
+    if (!token) {
+      navigate('/');
     }
     getCities();
-  }, []);
+  }, [navigate, token]);
 
-  // Jadval uchun kerak bu joyi 
+  // Jadval ustunlari
   const columns = [
     {
       title: 'Images',
@@ -81,24 +87,40 @@ function Home() {
     {
       title: 'Actions',
       dataIndex: 'actions',
-      render: () => (
+      render: (_, item) => (
         <>
-          <Button type='primary'>Edit </Button>
-          <Button danger type='primary'>Delete </Button>
+          <Button type='primary'>Edit</Button>
+          <Button danger type='primary' onClick={() => deleteCities(item.key)}>Delete</Button>
         </>
       )
     }
   ];
 
   const BaseUrl = 'https://autoapi.dezinfeksiyatashkent.uz/api/uploads/images/';
-  const data = cities.map((item, index) => ({
-    key: item.id || index, // Yunik IDni ishlatish yaxshiroq
-    number: index + 1,
+  const data = cities.map((item) => ({
+    key: item.id, // Yunik ID
     name: item.name,
     text: item.text,
     images: `${BaseUrl}${item.image_src}`, // Rasm URL-ni to'g'ri qo'shish
-    actions: null // Harakatlar boshqa tarzda ko'rsatilishi mumkin
   }));
+
+  // o'chirish funksiyasi
+  const deleteCities = (id) => {
+    axios.delete(`https://autoapi.dezinfeksiyatashkent.uz/api/cities/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    .then(() => {
+      message.success("O'chirildi");
+      // getCities(); // O'chirishdan so'ng ro'yxatni yangilash
+      const updateCity=cities.filter(res =>res.id!==id)
+      setCities(updateCity)//=>hech qanday funksiya ham chaqirmaydi funksiya ham ketmaydi.lekin automatik o`chirib yuboradi
+    })
+    .catch(() => {
+      message.error("Xatolik yuz berdi");
+    });
+  };
 
   return (
     <div>
@@ -138,7 +160,7 @@ function Home() {
             />
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={loading}>
               Submit
             </Button>
           </Form.Item>
