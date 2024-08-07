@@ -1,7 +1,9 @@
-import { Button, Form, Input, Modal, Table, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Modal, Table, Upload, message } from 'antd';
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router';
+
 
 function Home() {
   // Yuklanish holati
@@ -26,8 +28,7 @@ function Home() {
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('text', values.text);
-    formData.append('images', image);
-
+   formData.append('images', values.image.originFileObj)
     axios({
       url: 'https://autoapi.dezinfeksiyatashkent.uz/api/cities',
       method: 'POST',
@@ -61,6 +62,7 @@ function Home() {
       .then(response => setCities(response?.data?.data))
       .catch(error => console.error(error));
   };
+
 
   useEffect(() => {
     if (!token) {
@@ -113,14 +115,30 @@ function Home() {
     })
     .then(() => {
       message.success("O'chirildi");
-      // getCities(); // O'chirishdan so'ng ro'yxatni yangilash
-      const updateCity=cities.filter(res =>res.id!==id)
-      setCities(updateCity)//=>hech qanday funksiya ham chaqirmaydi funksiya ham ketmaydi.lekin automatik o`chirib yuboradi
+      getCities(); // O'chirishdan so'ng ro'yxatni yangilash
+      // const updateCity=cities.filter(res =>res.id!==id)
+      // setCities(updateCity)//=>hech qanday funksiya ham chaqirmaydi funksiya ham ketmaydi.lekin automatik o`chirib yuboradi.
     })
     .catch(() => {
       message.error("Xatolik yuz berdi");
     });
   };
+  
+  // rasm uchun funksiyasi
+  const beforeUpload = (file) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    if (!isJpgOrPng) {
+      message.error('You can only upload JPG/PNG file!');
+    }
+    return isJpgOrPng;
+  };
+
+  const normFile = (e) => {
+    if (Array.isArray(e)) {
+        return e;
+    }
+    return e && e.fileList;
+};
 
   return (
     <div>
@@ -149,15 +167,21 @@ function Home() {
           >
             <Input placeholder='Text' />
           </Form.Item>
-          <Form.Item
-            label="Images"
-            name="image"
-            rules={[{ required: true, message: 'Please upload an image!' }]}
-          >
-            <Input
-              type='file'
-              onChange={(e) => setImage(e.target.files[0])}
-            />
+          <Form.Item label="Upload Image" name="image"  getValueFromEvent={normFile} rules={[{ required: true, message: 'Please upload an image' }]}>
+            <Upload
+              customRequest={({ onSuccess }) => {
+                onSuccess("ok")
+              }}
+              beforeUpload={beforeUpload}
+              listType="picture-card"
+  
+              maxCount={1}
+            >
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Upload</div>
+              </div>
+            </Upload>
           </Form.Item>
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
             <Button type="primary" htmlType="submit" loading={loading}>
