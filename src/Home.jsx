@@ -31,6 +31,11 @@ const Home = () => {
     setOpen(false)
   }
   const columns = [
+    
+    {
+      title: 'Images',
+      dataIndex: 'images'
+    },
     {
       title: 'Name',
       dataIndex: 'name'
@@ -43,11 +48,7 @@ const Home = () => {
       title: 'Action',
       dataIndex: 'button'
     }
-    ,
-    {
-      title: 'Images',
-      dataIndex: 'images'
-    },
+   
   ]
   const ysf = cities.map((item,index)=>(
     {
