@@ -1,115 +1,118 @@
 import { Button, Form, Input, message } from 'antd';
 import axios from 'axios';
-import React from 'react';
-import LMS from '/lmss.svg';
-import Logo from '/logolms.png';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router';
 
-export default function Login() {
-  const [form] = Form.useForm();
+const Login = () => {
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
-
-  const handleLogin = async (values) => {
-    try {
-      const response = await axios({
-        url: 'https://autoapi.dezinfeksiyatashkent.uz/api/auth/signin',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          phone_number: values.phone,
-          password: values.password,
-        },
-      });
-
-      if (response.data.success) {
-        localStorage.setItem('token', response?.data?.data?.tokens?.accessToken?.token);
-        message.success("Maqtov yorliq olib chiqilar !!!");
-        form.resetFields();
-        navigate("/home");
-      } else {
-        message.error("Login or password is wrong!!!!!!!!!!");
+  const Enter = () => {
+    
+    axios({
+      url: 'https://autoapi.dezinfeksiyatashkent.uz/api/auth/signin',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: {
+        phone_number: phone,
+        password: password
       }
-    } catch (error) {
-      message.error("Login or password is wrong!!!!!!!!!!");
-    }
+    })
+      .then(res => {
+        if (res.data.success) {
+          localStorage.setItem('token', res?.data?.data?.tokens?.accessToken?.token);
+          message.success("Welcome!");
+          navigate("/home");
+        }
+      })
+      .catch(err => {
+        message.error("Invalid username or password!");
+      });
   };
 
   return (
-    <div style={{ display: "flex", textAlign: "center", height: "100%" }} className='container'>
-      <div style={{ width: "85%", alignItems: 'center', background: "rgb(29, 45, 91)", padding: "20px" }}>
-        <img src={LMS} alt="lms study" style={{ width: "100%" }} />
-      </div>
-      <div className='login-right' style={{ width: "100%" }}>
-        <p style={{
-          color: "black", padding: "10px", fontFamily: "sans-serif", fontSize: "12px", width: "70%",
-          textAlign: "center", margin: "0 auto", lineHeight: "1.3"
-        }}>
-          MUHAMMAD AL-XORAZMIY NOMIDAGI
-          TOSHKENT AXBOROT TEXNOLOGIYALARI
-          UNIVERSITETI
-        </p>
-        <span style={{ width: "100px", marginBottom: '20px' }}>
-          <img src={Logo} alt="logo lms" />
-        </span>
+    <div style={styles.container}>
+      <div style={styles.formContainer}>
         <Form
-          form={form}
-          name="login"
-          labelAlign="top" 
+          name="basic"
+          labelCol={{
+            span: 24,
+          }}
+          wrapperCol={{
+            span: 24,
+          }}
           style={styles.form}
-          initialValues={{ remember: true }}
+          initialValues={{
+            remember: true,
+          }}
           autoComplete="off"
-          onFinish={handleLogin}
+          onFinish={Enter}
         >
           <Form.Item
-            label="Phone"
+            label="Phone Number"
             name="phone"
-            rules={[{ required: true, message: 'Please input your phone number!' }]}
-            style={styles.formItem} 
+            rules={[
+              {
+                required: true,
+                message: 'Please input your phone number!',
+              },
+            ]}
           >
-            <Input />
+            <Input onChange={(e) => setPhone(e.target.value)} />
           </Form.Item>
-
           <Form.Item
             label="Password"
             name="password"
-            rules={[{ required: true, message: 'Please input your password!' }]}
-            style={styles.formItem} 
+            rules={[
+              {
+                required: true,
+                message: 'Please input your password!',
+              },
+            ]}
           >
-            <Input.Password />
+            <Input.Password onChange={(e) => setPassword(e.target.value)} />
           </Form.Item>
 
           <Form.Item
-            wrapperCol={{ offset: 0, span: 24 }} 
-            style={styles.formItem} 
+            wrapperCol={{
+              span: 24,
+            }}
           >
-            <Button type="primary" htmlType="submit" style={styles.button}>
-              Kirish
+            <Button type="primary" htmlType="submit" style={styles.submitButton}>
+              Submit
             </Button>
           </Form.Item>
         </Form>
-        <div>
-          <p style={{fontFamily:"sans-serif",fontSize:"10px"}}>Mualliflik huquqi © 2021 Toshkent axborot texnologiyalari universiteti</p>
-        </div>
       </div>
-      
     </div>
   );
-}
-
-const styles = {
-  form: {
-    maxWidth: '400px',
-    width: '100%',
-    padding: '20px',
-    margin: '0 auto',
-  },
-  button: {
-    width: '100%',
-    marginTop: "30px",
-  },
-  formItem: {
-    marginBottom: '16px',
-  }
 };
+
+// Custom styles
+const styles = {
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    backgroundColor: '#f0f2f5',
+  },
+  formContainer: {
+    background: '#fff',
+    padding: '40px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    width: '100%',
+    maxWidth: '400px',
+  },
+  form: {
+    maxWidth: '100%',
+  },
+  submitButton: {
+    width: '100%',
+  },
+};
+
+export default Login;

@@ -1,197 +1,159 @@
-import { PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Modal, Table, Upload, message } from 'antd';
-import axios from 'axios';
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router';
+import { PlusOutlined } from '@ant-design/icons'
+import { Button, Form, Input, message, Modal, Table, Upload } from 'antd'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 
-
-function Home() {
-  // Yuklanish holati
-  const [loading, setLoading] = useState(false);
-  // Modal holati
-  const [open, setOpen] = useState(false);
-  const showModal = () => setOpen(true);
-  const closeModal = () => setOpen(false);
-  // Navigatsiya va token
-  const navigate = useNavigate();
-  const token = localStorage.getItem('token');
-
-  // Rasm holati
-  const [image, setImage] = useState(null);
-
-  // Forma referensiyasi
-  const formRef = useRef(null);
-
-  // Formani yuborish funksiyasi
-  const handleSubmit = (values) => {
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('name', values.name);
-    formData.append('text', values.text);
-   formData.append('images', values.image.originFileObj)
-    axios({
-      url: 'https://autoapi.dezinfeksiyatashkent.uz/api/cities',
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'multipart/form-data'
-      },
-      data: formData
-    })
-    .then(response => {
-      if (response.data.success) {
-        message.success("Qo'shildi");
-        setOpen(false);
-        getCities();
-        formRef.current.resetFields(); // Formani tozalash
-      }
-    })
-    .catch(error => {
-      console.error(error);
-      message.error("Xatolik yuz berdi: " + (error.response?.data?.message || "Server bilan bog'lanishda xatolik"));
-    })
-    .finally(() => {
-      setLoading(false);
-    });
-  };
-
-  // API dan shaharlar ro'yxatini olish
-  const [cities, setCities] = useState([]);
-  const getCities = () => {
+const Home = () => {
+  const [cities, setCities] = useState([])
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [image, setImage] = useState(null)
+  const [currentcity, setCurrentcity] = useState(null)
+  const mytoken = localStorage.getItem('token')
+  const navigate = useNavigate()
+  const getCities = () =>{
     axios.get('https://autoapi.dezinfeksiyatashkent.uz/api/cities')
-      .then(response => setCities(response?.data?.data))
-      .catch(error => console.error(error));
-  };
-
-
-  useEffect(() => {
-    if (!token) {
-      navigate('/');
+    .then(res=>setCities(res?.data?.data))
+    .catch(err=>console.log(err))
+  } 
+  useEffect(()=>{
+    if(! mytoken){
+      navigate('/')
     }
-    getCities();
-  }, [navigate, token]);
-
-  // Jadval ustunlari
+    getCities()
+  },[])
+  const showModal = (item) =>{
+    setOpen(true)
+    setCurrentcity(item)
+  }
+  const closeModal = () =>{
+    setOpen(false)
+  }
   const columns = [
     {
-      title: 'Images',
-      dataIndex: 'images',
-      render: image => <img width={150} src={image} alt="city" />
-    },
-    {
       title: 'Name',
-      dataIndex: 'name',
+      dataIndex: 'name'
     },
     {
       title: 'Text',
-      dataIndex: 'text',
+      dataIndex: 'text'
     },
     {
-      title: 'Actions',
-      dataIndex: 'actions',
-      render: (_, item) => (
-        <>
-          <Button type='primary'>Edit</Button>
-          <Button danger type='primary' onClick={() => deleteCities(item.key)}>Delete</Button>
-        </>
-      )
+      title: 'Images',
+      dataIndex: 'images'
+    },
+    {
+      title: 'Action',
+      dataIndex: 'button'
     }
-  ];
-
-  const BaseUrl = 'https://autoapi.dezinfeksiyatashkent.uz/api/uploads/images/';
-  const data = cities.map((item) => ({
-    key: item.id, // Yunik ID
-    name: item.name,
-    text: item.text,
-    images: `${BaseUrl}${item.image_src}`, // Rasm URL-ni to'g'ri qo'shish
-  }));
-
-  // o'chirish funksiyasi
-  const deleteCities = (id) => {
-    axios.delete(`https://autoapi.dezinfeksiyatashkent.uz/api/cities/${id}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-    .then(() => {
-      message.success("O'chirildi");
-      getCities(); // O'chirishdan so'ng ro'yxatni yangilash
-      // const updateCity=cities.filter(res =>res.id!==id)
-      // setCities(updateCity)//=>hech qanday funksiya ham chaqirmaydi funksiya ham ketmaydi.lekin automatik o`chirib yuboradi.
-    })
-    .catch(() => {
-      message.error("Xatolik yuz berdi");
-    });
-  };
+  ]
+  const ysf = cities.map((item,index)=>(
+    {
+      key: index,
+      name: item.name,
+      text: item.text,
+      images: (<img width={200} src={`https://autoapi.dezinfeksiyatashkent.uz/api/uploads/images/${item.image_src}`}/> ),
+      button: (<><Button type='primary' onClick={()=>showModal(item)}>Edit</Button> <Button type='primary' danger onClick={()=>deleteCities(item.id)}>Delete</Button></>)
+    }
+  ))
   
-  // rasm uchun funksiyasi
-  const beforeUpload = (file) => {
-    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-    if (!isJpgOrPng) {
-      message.error('You can only upload JPG/PNG file!');
+  const createPost = (values) => {
+    setLoading(true)
+    const formData = new FormData();
+    formData.append('name', values.name);
+    formData.append('text', values.text);
+    
+    if (values.images && values.images.length > 0) {
+      values.images.forEach((image) => {
+        if (image && image.originFileObj) {
+          formData.append('images', image.originFileObj, image.name)
+        }
+      })
     }
-    return isJpgOrPng;
-  };
+  
+  axios({
+    url: currentcity?`https://autoapi.dezinfeksiyatashkent.uz/api/cities/${currentcity.id}`:`https://autoapi.dezinfeksiyatashkent.uz/api/cities`,
+    method:currentcity?'PUT':'POST',
+    headers:{
+      Authorization: `Bearer ${mytoken}`
+    },
+    data:formData
+  })
+  .then(res=>{
+    if(res?.data?.success){
+      currentcity?message.success("O'zgartirildi"):message.success("Qo'shildi ")
+      setOpen(false)
+      getCities()
+    }
+  })
+  .catch(err=>console.log(err))
+  .finally(()=>{
+    setLoading(false)
+  })
+} 
 
-  const normFile = (e) => {
-    if (Array.isArray(e)) {
-        return e;
+const deleteCities = (id) =>{
+  axios({
+    url: `https://autoapi.dezinfeksiyatashkent.uz/api/cities/${id}`,
+    method: 'DELETE',
+    headers:{
+      Authorization: `Bearer ${mytoken}`
     }
-    return e && e.fileList;
+  })
+  .then((res)=>{
+    message.success("post o'chirildi")
+    const updateCities = cities.filter(item => item.id !== id)
+    setCities(updateCities)
+  })
+  .catch(err=>{
+    message.error("xatolik mavjud")
+  })
+}
+const beforeUpload = (file) => {
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+  if (!isJpgOrPng) {
+    message.error('You can only upload JPG/PNG file!');
+  }
+  return isJpgOrPng;
 };
-
+const normFile = (e) => {
+  if (Array.isArray(e)) {
+      return e;
+  }
+  return e && e.fileList;
+}
   return (
     <div>
-      <div style={{ margin: "50px", textAlign: "right" }}>
-        <Button type='primary' onClick={showModal}>Add</Button>
-      </div>
-      <Table columns={columns} dataSource={data} />
-      <Modal title="City qo'shish" open={open} footer={null} onCancel={closeModal}>
-        <Form
-          ref={formRef}
-          wrapperCol={{ span: 20 }}
-          style={{ maxWidth: 600 }}
-          onFinish={handleSubmit}
-        >
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[{ required: true, message: 'Please input the name!' }]}
-          >
-            <Input placeholder='Name' />
+      <Button type='primary' onClick={()=>setOpen(true)}>Add</Button>
+      <Table columns={columns} dataSource={ysf}/>
+      <Modal open={open} onCancel={closeModal} footer={null}>
+        <Form onFinish={createPost} initialValues={currentcity || {}}>
+          <Form.Item label='Name' name='name'>
+            <Input placeholder='Name' style={{width: '90%'}}/>
           </Form.Item>
-          <Form.Item
-            label="Text"
-            name="text"
-            rules={[{ required: true, message: 'Please input the text!' }]}
-          >
-            <Input placeholder='Text' />
+          <Form.Item label='Text' name='text'>
+            <Input placeholder='Text' style={{width: '90%'}}/>
           </Form.Item>
-          <Form.Item label="Upload Image" name="image"  getValueFromEvent={normFile} rules={[{ required: true, message: 'Please upload an image' }]}>
+          <Form.Item label="Upload Image" name="images" valuePropName="fileList" getValueFromEvent={normFile} rules={[{ required: true, message: 'Please upload an image' }]}>
             <Upload
-              customRequest={({ onSuccess }) => {
-                onSuccess("ok")
-              }}
+              customRequest={({ onSuccess }) => { onSuccess("ok"); }}
               beforeUpload={beforeUpload}
               listType="picture-card"
-  
-              maxCount={1}
-            >
+              > 
               <div>
                 <PlusOutlined />
                 <div style={{ marginTop: 8 }}>Upload</div>
               </div>
             </Upload>
           </Form.Item>
-          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit" loading={loading}>
-              Submit
-            </Button>
-          </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" loading={loading}>Submit</Button>
+        </Form.Item>
         </Form>
       </Modal>
     </div>
-  );
+  )
 }
 
-export default Home;
+export default Home
