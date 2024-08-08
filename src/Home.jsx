@@ -40,13 +40,14 @@ const Home = () => {
       dataIndex: 'text'
     },
     {
-      title: 'Images',
-      dataIndex: 'images'
-    },
-    {
       title: 'Action',
       dataIndex: 'button'
     }
+    ,
+    {
+      title: 'Images',
+      dataIndex: 'images'
+    },
   ]
   const ysf = cities.map((item,index)=>(
     {

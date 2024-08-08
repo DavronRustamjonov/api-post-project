@@ -8,7 +8,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const Enter = () => {
-    
+
     axios({
       url: 'https://autoapi.dezinfeksiyatashkent.uz/api/auth/signin',
       method: 'POST',
