@@ -7,112 +7,57 @@ const Login = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const Enter = () => {
 
-    axios({
-      url: 'https://autoapi.dezinfeksiyatashkent.uz/api/auth/signin',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: {
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('https://autoapi.dezinfeksiyatashkent.uz/api/auth/signin', {
         phone_number: phone,
-        password: password
-      }
-    })
-      .then(res => {
-        if (res.data.success) {
-          localStorage.setItem('token', res?.data?.data?.tokens?.accessToken?.token);
-          message.success("Welcome!");
-          navigate("/home");
-        }
-      })
-      .catch(err => {
-        message.error("Invalid username or password!");
+        password,
       });
+
+      if (response.data.success) {
+        localStorage.setItem('token', response.data.data.tokens.accessToken.token);
+        message.success('Marhamat)');
+        navigate('/home');
+      }
+    } catch (error) {
+      message.error('Login yoki parol xato!');
+    }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.formContainer}>
-        <Form
-          name="basic"
-          labelCol={{
-            span: 24,
-          }}
-          wrapperCol={{
-            span: 24,
-          }}
-          style={styles.form}
-          initialValues={{
-            remember: true,
-          }}
-          autoComplete="off"
-          onFinish={Enter}
+    <div style={{ maxWidth: 600, margin: '40px auto' }}>
+      <Form
+        name="basic"
+        labelCol={{ span: 8 }}
+        wrapperCol={{ span: 16 }}
+        initialValues={{ remember: true }}
+        autoComplete="off"
+      >
+        <Form.Item
+          label="Username"
+          name="username"
+          rules={[{ required: true, message: 'Please input your username!' }]}
         >
-          <Form.Item
-            label="Phone Number"
-            name="phone"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your phone number!',
-              },
-            ]}
-          >
-            <Input onChange={(e) => setPhone(e.target.value)} />
-          </Form.Item>
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your password!',
-              },
-            ]}
-          >
-            <Input.Password onChange={(e) => setPassword(e.target.value)} />
-          </Form.Item>
+          <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+        </Form.Item>
 
-          <Form.Item
-            wrapperCol={{
-              span: 24,
-            }}
-          >
-            <Button type="primary" htmlType="submit" style={styles.submitButton}>
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-      </div>
+        <Form.Item
+          label="Password"
+          name="password"
+          rules={[{ required: true, message: 'Please input your password!' }]}
+        >
+          <Input.Password value={password} onChange={(e) => setPassword(e.target.value)} />
+        </Form.Item>
+
+        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+          <Button type="primary" onClick={handleLogin}>
+            Submit
+          </Button>
+        </Form.Item>
+      </Form>
     </div>
   );
-};
-
-// Custom styles
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    backgroundColor: '#f0f2f5',
-  },
-  formContainer: {
-    background: '#fff',
-    padding: '40px',
-    borderRadius: '8px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    width: '100%',
-    maxWidth: '400px',
-  },
-  form: {
-    maxWidth: '100%',
-  },
-  submitButton: {
-    width: '100%',
-  },
 };
 
 export default Login;

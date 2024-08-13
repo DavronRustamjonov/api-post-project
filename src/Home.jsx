@@ -3,14 +3,15 @@ import { Button, Form, Input, message, Modal, Table, Upload } from 'antd'
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { NavLink } from 'react-router-dom'
 
 const Home = () => {
   const [cities, setCities] = useState([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [image, setImage] = useState(null)
   const [currentcity, setCurrentcity] = useState(null)
   const mytoken = localStorage.getItem('token')
+  const [form] = Form.useForm()
   const navigate = useNavigate()
   const getCities = () =>{
     axios.get('https://autoapi.dezinfeksiyatashkent.uz/api/cities')
@@ -23,19 +24,20 @@ const Home = () => {
     }
     getCities()
   },[])
-  const showModal = (item) =>{
+  const showModal = (item) =>{    
+    form.setFieldsValue({
+      name: item.name,
+      text: item.text,
+      images: [{name:'images', url:`https://autoapi.dezinfeksiyatashkent.uz/api/uploads/images/${item.image_src}`} ]
+    })
     setOpen(true)
     setCurrentcity(item)
   }
   const closeModal = () =>{
     setOpen(false)
+    form.resetFields()
   }
   const columns = [
-    
-    {
-      title: 'Images',
-      dataIndex: 'images'
-    },
     {
       title: 'Name',
       dataIndex: 'name'
@@ -45,10 +47,13 @@ const Home = () => {
       dataIndex: 'text'
     },
     {
+      title: 'Images',
+      dataIndex: 'images'
+    },
+    {
       title: 'Action',
       dataIndex: 'button'
     }
-   
   ]
   const ysf = cities.map((item,index)=>(
     {
@@ -83,10 +88,11 @@ const Home = () => {
     data:formData
   })
   .then(res=>{
-    if(res?.data?.success){
+    if(res?.data.success){
       currentcity?message.success("O'zgartirildi"):message.success("Qo'shildi ")
       setOpen(false)
       getCities()
+      form.resetFields()
     }
   })
   .catch(err=>console.log(err))
@@ -127,10 +133,13 @@ const normFile = (e) => {
 }
   return (
     <div>
-      <Button type='primary' onClick={()=>setOpen(true)}>Add</Button>
+      <span >
+      <Button style={{margin:'10px'}} type='primary' onClick={()=>setOpen(true)}>Add</Button>
+      <Button style={{margin:'10px'}} type='primary'><NavLink to="/models">Models</NavLink></Button>
+      </span>
       <Table columns={columns} dataSource={ysf}/>
-      <Modal open={open} onCancel={closeModal} footer={null}>
-        <Form onFinish={createPost} initialValues={currentcity || {}}>
+      <Modal open={open} onCancel={closeModal} footer={null} >
+        <Form  form={form} onFinish={createPost}>
           <Form.Item label='Name' name='name'>
             <Input placeholder='Name' style={{width: '90%'}}/>
           </Form.Item>
