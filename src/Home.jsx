@@ -110,7 +110,7 @@ const deleteCities = (id) =>{
     }
   })
   .then((res)=>{
-    message.success("post o'chirildi")
+    message.success("O`chirildi")
     const updateCities = cities.filter(item => item.id !== id)
     setCities(updateCities)
   })

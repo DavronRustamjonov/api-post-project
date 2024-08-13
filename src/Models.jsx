@@ -1,57 +1,63 @@
 import { message } from 'antd';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Models = () => {
   const [models, setModels] = useState([]);
   const [brands, setBrands] = useState([]);
   const [name, setName] = useState('');
   const [brandId, setBrandId] = useState('');
-  const mytoken = localStorage.getItem('token');
-  const getModels = () => {
-    axios.get('https://autoapi.dezinfeksiyatashkent.uz/api/models')
-      .then((res) => setModels(res?.data?.data))
-      .catch((err) => console.log(err));
-  };
+  const token = localStorage.getItem('token');
 
-  const getBrands = () => {
-    axios.get('https://autoapi.dezinfeksiyatashkent.uz/api/brands')
-      .then((res) => setBrands(res?.data?.data))
-      .catch((err) => console.log(err));
-  };
   useEffect(() => {
-    getModels();
-    getBrands();
+    const fetchModels = async () => {
+      try {
+        const response = await axios.get('https://autoapi.dezinfeksiyatashkent.uz/api/models');
+        setModels(response.data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchBrands = async () => {
+      try {
+        const response = await axios.get('https://autoapi.dezinfeksiyatashkent.uz/api/brands');
+        setBrands(response.data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchModels();
+    fetchBrands();
   }, []);
 
-  const addModels = (e) => {
+  const handleAddModel = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('brand_id', brandId);
-    axios({
-      url: 'https://autoapi.dezinfeksiyatashkent.uz/api/models',
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${mytoken}`,
-      },
-      data: formData,
-    })
-      .then((res) => {
-        if (res?.data.success) {
-          message.success("Qo'shildi");
-          getModels();
-        }
-      })
-      .catch((err) => {
-        message.error("Xatolik mavjud");
+    try {
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('brand_id', brandId);
+
+      const response = await axios.post('https://autoapi.dezinfeksiyatashkent.uz/api/models', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
+      if (response.data.success) {
+        message.success("Qo'shildi");
+        setModels([...models, response.data.data]);
+      }
+    } catch (error) {
+      message.error("Xatolik mavjud");
+    }
   };
 
   return (
     <div style={{ padding: 20 }}>
       <h2>Models</h2>
-      <form onSubmit={addModels}>
+      <form onSubmit={handleAddModel}>
         <input
           type="text"
           value={name}
@@ -67,12 +73,11 @@ const Models = () => {
           <option value="" disabled>
             Select brand
           </option>
-          {brands &&
-            brands.map((brand, index) => (
-              <option key={index} value={brand.id}>
-                {brand.title}
-              </option>
-            ))}
+          {brands.map((brand, index) => (
+            <option key={index} value={brand.id}>
+              {brand.title}
+            </option>
+          ))}
         </select>
         <button type="submit" style={{ height: 30, width: 100 }}>
           Add
@@ -80,19 +85,18 @@ const Models = () => {
       </form>
       <table style={{ marginTop: 20 }}>
         <thead>
-          <tr>
+          <tr style={{textAlign:"left"}}>
             <th>Model</th>
             <th>Brand</th>
           </tr>
         </thead>
         <tbody>
-          {models &&
-            models.map((item, index) => (
-              <tr key={index}>
-                <td>{item.name}</td>
-                <td>{item.brand_title}</td>
-              </tr>
-            ))}
+          {models.map((item, index) => (
+            <tr key={index}>
+              <td>{item.name}</td>
+              <td>{item.brand_title}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
